@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知春点点乐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f9e8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+        .game-container {
+            width: 800px;
+            height: 500px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .score-board {
+            font-size: 24px;
+            color: #2a9d8f;
+            font-weight: bold;
+        }
+        .timer {
+            font-size: 24px;
+            color: #e76f51;
+            font-weight: bold;
+            margin-left: 30px;
+        }
+        .start-btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #2a9d8f;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .start-btn:hover {
+            background-color: #21867a;
+        }
+        .target {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            color: #e76f51;
+            font-size: 20px;
+            font-weight: bold;
+            position: absolute;
+            cursor: pointer;
+            user-select: none;
+        }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            color: #e76f51;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="score-board">
+        得分: <span id="score">0</span>
+        <span class="timer">时间: <span id="time">60</span>s</span>
+    </div>
+    <div class="game-container" id="gameContainer"></div>
+    <button class="start-btn" id="startBtn">开始游戏</button>
+
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const startBtn = document.getElementById('startBtn');
+        const scoreSpan = document.getElementById('score');
+        const timeSpan = document.getElementById('time');
+        let score = 0;
+        let time = 60;
+        let timer = null;
+        let targetTimer = null;
+
+        // 生成随机位置的目标
+        function createTarget() {
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.textContent = '春';
+            // 随机位置，不超出容器
+            const maxX = gameContainer.clientWidth - 50;
+            const maxY = gameContainer.clientHeight - 50;
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            target.style.left = `${x}px`;
+            target.style.top = `${y}px`;
+            // 点击加分并移除
+            target.addEventListener('click', () => {
+                score++;
+                scoreSpan.textContent = score;
+                gameContainer.removeChild(target);
+            });
+            gameContainer.appendChild(target);
+            // 目标自动消失
+            setTimeout(() => {
+                if (document.contains(target)) {
+                    gameContainer.removeChild(target);
+                }
+            }, 1000);
+        }
+
+        // 开始游戏
+        startBtn.addEventListener('click', () => {
+            score = 0;
+            time = 60;
+            scoreSpan.textContent = score;
+            timeSpan.textContent = time;
+            startBtn.disabled = true;
+            // 倒计时
+            timer = setInterval(() => {
+                time--;
+                timeSpan.textContent = time;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    clearInterval(targetTimer);
+                    startBtn.disabled = false;
+                    const gameOver = document.createElement('div');
+                    gameOver.className = 'game-over';
+                    gameOver.textContent = `游戏结束！得分: ${score}`;
+                    gameContainer.appendChild(gameOver);
+                    gameOver.style.display = 'block';
+                }
+            }, 1000);
+            // 每隔500ms生成一个目标
+            targetTimer = setInterval(createTarget, 500);
+        });
+    </script>
+</body>
+</html>
